@@ -134,6 +134,8 @@ impl MerkleTree {
             let other_leftmost = self.get_leftmost_node_with_height(other_root, min_height);
 
             let same_val_count = MerkleTree::get_same_val_count(my_leftmost, other_leftmost);
+
+            println!("Same val count: {:?}", same_val_count);
             let common_arr = self.arr[..same_val_count].to_vec();
             let my_diff_arr = self.arr[same_val_count..].to_vec();
             let other_diff_arr = other.arr[same_val_count..].to_vec();
@@ -158,19 +160,37 @@ impl MerkleTree {
         None
     }
 
-    fn get_same_val_count(a: Option<&Node>, b: Option<&Node>) -> usize {
-        match (a, b) {
-            (Some(a_node), Some(b_node)) => {
-                if a_node.value == b_node.value {
-                    a_node.leave_count
-                } else {
-                    0
-                }
-            }
-            _ => 0,
-        }
+    pub fn get_same_val_count(node_a: Option<&Node>, node_b: Option<&Node>) -> usize {
+        let mut heights = Vec::new();
+        Self::get_height_for_same_val_rec(node_a, node_b, &mut heights);
+    
+        heights.iter().sum()
     }
 
+    fn get_height_for_same_val_rec(
+        node_a: Option<&Node>,
+        node_b: Option<&Node>,
+        heights: &mut Vec<usize>,
+    ) {
+        // Base case: if either node is None, return
+        if node_a.is_none() || node_b.is_none() {
+            return;
+        }
+
+        let node_a = node_a.unwrap();
+        let node_b = node_b.unwrap();
+
+        // If values are equal, push the leave_count
+        if node_a.value == node_b.value {
+            heights.push(node_a.leave_count);
+            return;
+        }
+
+        // Recursively check left and right children
+        Self::get_height_for_same_val_rec(node_a.left.as_ref().map(|n| &**n), node_b.left.as_ref().map(|n| &**n), heights);
+        Self::get_height_for_same_val_rec(node_a.right.as_ref().map(|n| &**n), node_b.right.as_ref().map(|n| &**n), heights);
+    }
+    
     fn merge_sorted_arrays(arr1: &[String], arr2: &[String]) -> Vec<String> {
         let mut merged: Vec<String> = Vec::new();
         let mut i = 0;

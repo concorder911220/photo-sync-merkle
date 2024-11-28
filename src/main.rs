@@ -13,7 +13,7 @@ fn main() {
 
     let elems2 = vec![
         "A".to_string(),
-        "XX".to_string(),
+        "B".to_string(),
         "C".to_string(),
         "D".to_string(),
         "E".to_string(),
